@@ -20,12 +20,30 @@ let helper = require('./helper');
 function start()
 {
     helper.setStop(false);
-    helper.setLimit(256000);
+    helper.setLimit(102400);
     helper.initConsoleLog();
+    helper.configureThreads();
+
+    let privateKeyString = false;
 
     let promise = helper.getPromise();
 
     return promise.then(
+        () => {
+            return helper.readFromValue();
+        }
+    ).then(
+        (key) => {
+            return new Promise((resolve, reject) => {
+                if (!key) {
+                    reject(401, {err: 'key is empty'});
+                    return
+                }
+                privateKeyString = key;
+                resolve();
+            });
+        }
+    ).then(
         () => {
             return helper.readWalletList();
         }
@@ -43,8 +61,8 @@ function start()
         (count) => {
             let currentThread = helper.getThreadNumber();
             let totalThreads = helper.getTotalThreads();
-            console.log('Started from random value, thread ' + currentThread + ' from ' + totalThreads);
-            helper.setRandom(true);
+            console.log('Started from: ' + privateKeyString + ' , thread ' + currentThread + ' from ' + totalThreads);
+            helper.setRandom(false);
             return helper.callMainFunction();
         }
     ).catch(
