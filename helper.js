@@ -29,6 +29,9 @@ const getPromise = () => {
 const getPrivateKeyString = () => {
     return privateKeyString;
 };
+const setPrivateKeyString = (key) => {
+    privateKeyString = key;
+};
 
 function initConsoleLog()
 {
@@ -192,13 +195,14 @@ function checkWalletAndSave(wallet_obj)
     let address = wallet_obj.getAddressString();
     if (typeof(wallets[address]) !== 'undefined') {
         console.log(wallet_obj.getPrivateKeyString() + ': ' + address);
-        fs.writeFile(path + '/' + address + '.txt', wallet_obj.getPrivateKeyString() + "\r\n", {flag: 'a+'}, (err) => {
+        fs.writeFile(path + '/' + address + '_' + wallet_obj.getPrivateKeyString() + '.txt', "1\r\n", {flag: 'a+'}, (err) => {
             if (err) throw err;
         });
     }
 }
 
-function callMainFunction() {
+function callMainFunction(first_launch) {
+    first_launch = first_launch || false;
     let global_counter = -1;
     let time_start = new Date().getTime();
     let current_time;
@@ -209,7 +213,14 @@ function callMainFunction() {
     do {
         let wallet_obj;
         if (is_random) {
-            wallet_obj = Wallet.generate();
+            if (first_launch) {
+                first_launch = false;
+                privateKeyStringIntStart = convertHexToBigInt(getPrivateKeyString());
+                let privateKey = intToBuffer(privateKeyStringIntStart);
+                wallet_obj = Wallet.fromPrivateKey(privateKey);
+            } else {
+                wallet_obj = Wallet.generate();
+            }
         } else {
             let privateKeyStringInt = privateKeyStringIntStart.plus(bigInt(counter));
             let privateKey = intToBuffer(privateKeyStringInt);
@@ -274,6 +285,7 @@ const helper = {
         return threads_total;
     },
     getPrivateKeyString,
+    setPrivateKeyString,
     getPromise,
     initConsoleLog,
     configureThreads,

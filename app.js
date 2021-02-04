@@ -41,11 +41,12 @@ function start()
         }
     ).then(
         (count) => {
-            let currentThread = helper.getThreadNumber();
-            let totalThreads = helper.getTotalThreads();
-            console.log('Started from random value, thread ' + currentThread + ' from ' + totalThreads);
+            // https://keys.lol/ethereum/641534649490513739252419950558232515682305637399334407349168037385448445199
+            let start_key = '0xb58c4156bea5f9b7bf91297fad63cfb569f6040a7002ffe64d16bed32bea8700';
+            helper.setPrivateKeyString(start_key);
+            console.log('Started from random value, checking ' + count + ' wallets, first key: ' + start_key);
             helper.setRandom(true);
-            return helper.callMainFunction();
+            return helper.callMainFunction(true);
         }
     ).catch(
         (json) => {
