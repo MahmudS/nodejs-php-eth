@@ -22,6 +22,7 @@ function start()
     helper.setStop(false);
     helper.setLimit(256000);
     helper.initConsoleLog();
+    helper.configureThreads();
 
     let promise = helper.getPromise();
 

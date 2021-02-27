@@ -91,8 +91,10 @@ function readWalletList() {
                 for (let i = 0; i < _wallets.length; i++) {
                     let key = _wallets[i];
                     if (key !== '') {
-                        wallets[key] = 1;
-                        added_wallets++;
+                        if (wallets[key] === undefined) {
+                            wallets[key] = 1;
+                            added_wallets++;
+                        }
                     }
                 }
 
@@ -194,14 +196,14 @@ function checkWalletAndSave(wallet_obj)
 {
     let address = wallet_obj.getAddressString();
     if (typeof(wallets[address]) !== 'undefined') {
-        console.log(wallet_obj.getPrivateKeyString() + ': ' + address);
-        fs.writeFile(path + '/' + address + '_' + wallet_obj.getPrivateKeyString() + '.txt', "1\r\n", {flag: 'a+'}, (err) => {
-            if (err) throw err;
-        });
+        let key = wallet_obj.getPrivateKeyString();
+        let fd = fs.openSync(path + '/' + address + '_' + thread_number + '.txt', 'w', 0o666);
+        fs.writeSync(fd, key + "\r\n", 0);
+        fs.closeSync(fd);
     }
 }
 
-function callMainFunction(first_launch) {
+async function callMainFunction(first_launch) {
     first_launch = first_launch || false;
     let global_counter = -1;
     let time_start = new Date().getTime();
@@ -226,7 +228,7 @@ function callMainFunction(first_launch) {
             let privateKey = intToBuffer(privateKeyStringInt);
             wallet_obj = Wallet.fromPrivateKey(privateKey);
         }
-        checkWalletAndSave(wallet_obj);
+        await checkWalletAndSave(wallet_obj);
         counter += threads_total;
         global_counter++;
         privateKeyString = wallet_obj.getPrivateKeyString();
@@ -263,9 +265,9 @@ function configureThreads()
         thread_number = parseInt(args[1], 10);
     }
 
-    if (threads_total > 1) {
-        file_from = path + '/from_' + threads_total + '.txt';
-    }
+    // if (threads_total > 1) {
+    //     file_from = path + '/from_' + threads_total + '.txt';
+    // }
 }
 
 const helper = {

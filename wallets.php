@@ -57,7 +57,7 @@ echo '</pre>';
 $wallets = array_unique($wallets);
 
 if (count($wallets)) {
-    $handle = fopen($filename, 'w');
+    $handle = fopen($filename, 'a');
     foreach ($wallets as $wallet) {
         fwrite($handle, $wallet . "\r\n");
     }
